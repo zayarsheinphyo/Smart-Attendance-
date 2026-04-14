@@ -114,17 +114,17 @@ export default function App() {
 
   useEffect(() => {
     if (!user || !db) return;
-    const unsubEmp = onSnapshot(collection(db, 'artifacts', appId, 'users', user.uid, 'employees'), (snap) => {
+    const unsubEmp = onSnapshot(collection(db, 'artifacts', appId, 'users', "shared_company", 'employees'), (snap) => {
       const emps = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       emps.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
       setEmployees(emps);
     });
-    const unsubRec = onSnapshot(collection(db, 'artifacts', appId, 'users', user.uid, 'records'), (snap) => {
+    const unsubRec = onSnapshot(collection(db, 'artifacts', appId, 'users', "shared_company", 'records'), (snap) => {
       const recs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       recs.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
       setRecords(recs);
     });
-    const unsubSet = onSnapshot(doc(db, 'artifacts', appId, 'users', user.uid, 'settings', 'general'), (snap) => {
+    const unsubSet = onSnapshot(doc(db, 'artifacts', appId, 'users', "shared_company", 'settings', 'general'), (snap) => {
       if (snap.exists()) {
         const data = snap.data();
         setOffDaysLimit(data.offDaysLimit ?? 2);
@@ -171,7 +171,7 @@ export default function App() {
   const saveNewAdminPassword = async () => {
     if (!user) return;
     try {
-      await setDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'settings', 'general'), {
+      await setDoc(doc(db, 'artifacts', appId, 'users', "shared_company", 'settings', 'general'), {
         customAdminPassword: newPasswordInput
       }, { merge: true });
       setNewPasswordInput('');
@@ -189,7 +189,7 @@ export default function App() {
       const targetTime = new Date(deleteBeforeDate).getTime();
       const recordsToDelete = records.filter(r => r.createdAt && r.createdAt < targetTime);
       
-      const promises = recordsToDelete.map(r => deleteDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'records', r.id)));
+      const promises = recordsToDelete.map(r => deleteDoc(doc(db, 'artifacts', appId, 'users', "shared_company", 'records', r.id)));
       await Promise.all(promises);
       
       showNotification(`မှတ်တမ်းဟောင်း ${recordsToDelete.length} ခုကို အောင်မြင်စွာ ဖျက်ပစ်ပြီးပါပြီရှင့်။`);
@@ -369,13 +369,13 @@ Please write a short, encouraging performance review and HR advice in Burmese ba
     if (!newEmpName.trim() || !user) return;
     try {
       if (editingEmpId) {
-        await updateDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'employees', editingEmpId), {
+        await updateDoc(doc(db, 'artifacts', appId, 'users', "shared_company", 'employees', editingEmpId), {
           name: newEmpName, position: newEmpPosition || 'ဝန်ထမ်း'
         });
         setEditingEmpId(null);
         showNotification('ဝန်ထမ်းအချက်အလက် ပြင်ဆင်ပြီးပါပြီရှင့်။');
       } else {
-        await addDoc(collection(db, 'artifacts', appId, 'users', user.uid, 'employees'), {
+        await addDoc(collection(db, 'artifacts', appId, 'users', "shared_company", 'employees'), {
           name: newEmpName, position: newEmpPosition || 'ဝန်ထမ်း', offDays: [], createdAt: Date.now()
         });
         showNotification('ဝန်ထမ်းအသစ် ထည့်သွင်းပြီးပါပြီရှင့်။');
@@ -402,7 +402,7 @@ Please write a short, encouraging performance review and HR advice in Burmese ba
   const handleDeleteEmployee = async (id) => {
     if (!user) return;
     try {
-      await deleteDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'employees', id));
+      await deleteDoc(doc(db, 'artifacts', appId, 'users', "shared_company", 'employees', id));
       showNotification('ဝန်ထမ်းအား ဖျက်ပစ်ပြီးပါပြီရှင့်။', 'error');
     } catch (err) {}
   };
@@ -417,7 +417,7 @@ Please write a short, encouraging performance review and HR advice in Burmese ba
     const parsedDays = tempOffDays.map(d => parseInt(d, 10)).filter(d => !isNaN(d) && d >= 1 && d <= 31);
     parsedDays.sort((a, b) => a - b);
     try {
-      await updateDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'employees', editingOffDaysEmp.id), { offDays: parsedDays });
+      await updateDoc(doc(db, 'artifacts', appId, 'users', "shared_company", 'employees', editingOffDaysEmp.id), { offDays: parsedDays });
       setEditingOffDaysEmp(null);
       showNotification(`${editingOffDaysEmp.name} အတွက် နားရက် သတ်မှတ်ပြီးပါပြီရှင့်။`);
     } catch (err) {}
@@ -426,7 +426,7 @@ Please write a short, encouraging performance review and HR advice in Burmese ba
   const updateSettings = async (updates) => {
     if (!user) return;
     try {
-      await setDoc(doc(db, 'artifacts', appId, 'users', user.uid, 'settings', 'general'), updates, { merge: true });
+      await setDoc(doc(db, 'artifacts', appId, 'users', "shared_company", 'settings', 'general'), updates, { merge: true });
     } catch (err) {}
   };
 
@@ -570,7 +570,7 @@ Please write a short, encouraging performance review and HR advice in Burmese ba
     }
 
     try {
-      await addDoc(collection(db, 'artifacts', appId, 'users', user.uid, 'records'), {
+      await addDoc(collection(db, 'artifacts', appId, 'users', "shared_company", 'records'), {
         employeeId: selectedEmployee.id, employeeName: selectedEmployee.name, date: dateStr,
         time: timeStr, isLate, lateMinutes, isAbsent, photo: photoDataUrl, createdAt: Date.now()
       });
