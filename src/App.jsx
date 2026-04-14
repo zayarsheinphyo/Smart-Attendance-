@@ -68,6 +68,7 @@ export default function App() {
   const canvasRef = useRef(null);
   const [stream, setStream] = useState(null);
   const [notification, setNotification] = useState(null);
+  const isCapturingRef = useRef(false);
 
   const [isScanningQR, setIsScanningQR] = useState(false);
   const [scannedEmployee, setScannedEmployee] = useState(null);
@@ -543,10 +544,12 @@ Please write a short, encouraging performance review and HR advice in Burmese ba
   const closeCamera = () => {
     if (stream) stream.getTracks().forEach(track => track.stop());
     setIsCameraOpen(false); setStream(null);
+    isCapturingRef.current = false;
   };
 
   const capturePhoto = async () => {
-    if (!videoRef.current || !canvasRef.current || !user) return;
+    if (!videoRef.current || !canvasRef.current || !user || isCapturingRef.current) return;
+    isCapturingRef.current = true;
     const video = videoRef.current; const canvas = canvasRef.current;
     const scale = Math.min(1, 320 / video.videoWidth);
     canvas.width = video.videoWidth * scale; canvas.height = video.videoHeight * scale;
@@ -589,6 +592,7 @@ Please write a short, encouraging performance review and HR advice in Burmese ba
       setScannedEmployee(null); setSelectedEmployee(null);
     } catch (err) {
       showNotification('စာရင်းသွင်းခြင်း မအောင်မြင်ပါရှင့်', 'error');
+      isCapturingRef.current = false;
     }
   };
 
