@@ -232,8 +232,14 @@ export default function App() {
         empRecords = empRecords.filter(r => r.date.endsWith(targetMonthSuffix));
       }
 
-      const totalLate = empRecords.reduce((sum, r) => sum + (r.lateMinutes || 0), 0);
-      let absences = empRecords.filter(r => r.isAbsent).length;
+      const totalLate = empRecords.reduce((sum, r) => {
+        const dNum = parseInt(r.date.split('/')[0], 10);
+        return emp.offDays?.includes(dNum) ? sum : sum + (r.lateMinutes || 0);
+      }, 0);
+      let absences = empRecords.filter(r => {
+        const dNum = parseInt(r.date.split('/')[0], 10);
+        return r.isAbsent && !emp.offDays?.includes(dNum);
+      }).length;
 
       const isTodayOffDay = emp.offDays?.includes(todayDateNum);
       const hasCheckedInToday = records.some(r => r.employeeId === emp.id && r.date === todayStr);
@@ -567,9 +573,12 @@ Please write a short, encouraging performance review and HR advice in Burmese ba
     targetTime.setHours(tHours || 8, tMins || 0, 0, 0);
 
     let isLate = false, lateMinutes = 0, isAbsent = false;
-    if (currentHour >= 12) { isAbsent = true; } 
-    else if (now > targetTime) {
-      isLate = true; lateMinutes = Math.floor((now - targetTime) / 60000);
+    const isTodayOffDayForEmp = selectedEmployee.offDays?.includes(now.getDate());
+    if (!isTodayOffDayForEmp) {
+      if (currentHour >= 12) { isAbsent = true; } 
+      else if (now > targetTime) {
+        isLate = true; lateMinutes = Math.floor((now - targetTime) / 60000);
+      }
     }
 
     try {
