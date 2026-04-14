@@ -724,10 +724,10 @@ Please write a short, encouraging performance review and HR advice in Burmese ba
                 <ClipboardList className="w-5 h-5 text-indigo-500" /> ယနေ့ မှတ်တမ်းများ
               </h2>
               <div className="space-y-3">
-                {records.length === 0 ? (
-                  <p className="text-sm text-slate-400 text-center py-4">မှတ်တမ်း မရှိသေးပါရှင့်။</p>
+                {records.filter(r => r.date === new Date().toLocaleDateString('en-GB')).length === 0 ? (
+                  <p className="text-sm text-slate-400 text-center py-4">ယနေ့အတွက် မှတ်တမ်း မရှိသေးပါရှင့်။</p>
                 ) : (
-                  records.slice(0, 5).map(rec => (
+                  records.filter(r => r.date === new Date().toLocaleDateString('en-GB')).slice(0, 5).map(rec => (
                     <div key={rec.id} className="flex items-center gap-4 p-3 rounded-xl border border-slate-100 bg-white">
                       <img src={rec.photo} alt="selfie" className="w-12 h-12 rounded-full object-cover border-2 border-slate-200" />
                       <div className="flex-1">
