@@ -92,7 +92,7 @@ export default function App() {
   const [aiReport, setAiReport] = useState(null);
   const [isGeneratingReport, setIsGeneratingReport] = useState(false);
 
-  const apiKey = ""; 
+  const apiKey = "AIzaSyACLR7KxwlwhQZ5urDgvn-5STILAGZPbs8";
 
   // --- Firebase Listeners ---
   useEffect(() => {
@@ -324,7 +324,7 @@ export default function App() {
     const delays = [1000, 2000, 4000, 8000, 16000];
     for (let i = 0; i < retries; i++) {
       try {
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
