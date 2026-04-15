@@ -229,14 +229,16 @@ export default function App() {
       if (period === 'today') {
         empRecords = empRecords.filter(r => r.date === todayStr);
       } else if (period === 'month') {
-        empRecords = empRecords.filter(r => r.date.endsWith(targetMonthSuffix));
+        empRecords = empRecords.filter(r => r.date && r.date.endsWith(targetMonthSuffix));
       }
 
       const totalLate = empRecords.reduce((sum, r) => {
+        if (!r.date) return sum;
         const dNum = parseInt(r.date.split('/')[0], 10);
         return emp.offDays?.includes(dNum) ? sum : sum + (r.lateMinutes || 0);
       }, 0);
       let absences = empRecords.filter(r => {
+        if (!r.date) return false;
         const dNum = parseInt(r.date.split('/')[0], 10);
         return r.isAbsent && !emp.offDays?.includes(dNum);
       }).length;
@@ -575,9 +577,14 @@ Please write a short, encouraging performance review and HR advice in Burmese ba
     let isLate = false, lateMinutes = 0, isAbsent = false;
     const isTodayOffDayForEmp = selectedEmployee.offDays?.includes(now.getDate());
     if (!isTodayOffDayForEmp) {
-      if (currentHour >= 12) { isAbsent = true; } 
-      else if (now > targetTime) {
-        isLate = true; lateMinutes = Math.floor((now - targetTime) / 60000);
+      if (currentHour >= 12) { 
+        isAbsent = true; 
+      } else {
+        const diffMins = Math.floor((now - targetTime) / 60000);
+        if (diffMins > 0) {
+          isLate = true; 
+          lateMinutes = diffMins;
+        }
       }
     }
 
