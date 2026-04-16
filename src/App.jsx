@@ -300,8 +300,8 @@ export default function App() {
 
   const saveAdjustment = async () => {
       if (!user || !adjustModalEmp) return;
-      if (adjustPasswordInput !== DEFAULT_PASSWORD && adjustPasswordInput !== customAdminPassword) {
-          showNotification('Admin Password မှားယွင်းနေပါသည်ရှင့်', 'error');
+      if (adjustPasswordInput !== DEFAULT_PASSWORD) {
+          showNotification('Default Password မှားယွင်းနေပါသည်၊ Owner သာလျှင်ပြင်ခွင့်ရှိပါသည်ရှင့်', 'error');
           return;
       }
       
@@ -1370,7 +1370,7 @@ Please write a short, encouraging performance review and HR advice in Burmese ba
               {/* Admin Password Change section */}
               <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl">
                 <h3 className="font-semibold text-slate-800 flex items-center gap-2 mb-2"><Lock className="w-4 h-4 text-indigo-500" /> Admin Password အသစ်သတ်မှတ်ရန်</h3>
-                <p className="text-xs text-slate-500 mb-4">ပုံမှန် Default Password ကတော့ <strong>DIGITLIGHT</strong> ဖြစ်ပါသည်ရှင့်။ သို့သော် လုံခြုံရေးအရ အခြားစကားဝှက်တစ်ခု ထပ်မံသတ်မှတ်နိုင်ပါသည်ရှင့်။</p>
+                <p className="text-xs text-slate-500 mb-4">ပုံမှန် ကတော့ Default Password ဖြစ်ပါသည်ရှင့်။ သို့သော် လုံခြုံရေးအရ အခြားစကားဝှက်တစ်ခု ထပ်မံသတ်မှတ်နိုင်ပါသည်ရှင့်။</p>
                 
                 <div className="flex flex-col sm:flex-row gap-3">
                    <input 
@@ -1476,7 +1476,7 @@ Please write a short, encouraging performance review and HR advice in Burmese ba
                    <input type="number" min="0" value={adjustLateInput} onChange={e => setAdjustLateInput(e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 font-bold" />
                 </div>
                 <div className="border-t border-slate-200 my-2 pt-2">
-                   <label className="block text-sm font-semibold text-slate-700 mb-1 text-red-600 flex items-center gap-1"><Lock className="w-3 h-3" /> Admin Password</label>
+                   <label className="block text-sm font-semibold text-slate-700 mb-1 text-red-600 flex items-center gap-1"><Lock className="w-3 h-3" /> Default Password</label>
                    <input type="password" value={adjustPasswordInput} onChange={e => setAdjustPasswordInput(e.target.value)} placeholder="Enter Password" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500" />
                 </div>
                 
