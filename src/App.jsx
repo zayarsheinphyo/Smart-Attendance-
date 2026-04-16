@@ -87,6 +87,12 @@ export default function App() {
   const [showDeleteConfirmModal, setShowDeleteConfirmModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // --- Adjustment States ---
+  const [adjustModalEmp, setAdjustModalEmp] = useState(null);
+  const [adjustAbsencesInput, setAdjustAbsencesInput] = useState(0);
+  const [adjustLateInput, setAdjustLateInput] = useState(0);
+  const [adjustPasswordInput, setAdjustPasswordInput] = useState('');
+
   // AI States
   const [welcomeModal, setWelcomeModal] = useState(null);
   const [aiReport, setAiReport] = useState(null);
@@ -284,6 +290,49 @@ export default function App() {
     setIsDeleting(false);
   };
 
+  // --- Adjustment Logic ---
+  const openAdjustModal = (emp) => {
+      setAdjustModalEmp(emp);
+      setAdjustAbsencesInput(emp.absences);
+      setAdjustLateInput(emp.totalLate);
+      setAdjustPasswordInput('');
+  };
+
+  const saveAdjustment = async () => {
+      if (!user || !adjustModalEmp) return;
+      if (adjustPasswordInput !== DEFAULT_PASSWORD && adjustPasswordInput !== customAdminPassword) {
+          showNotification('Admin Password မှားယွင်းနေပါသည်ရှင့်', 'error');
+          return;
+      }
+      
+      const newAbsences = parseInt(adjustAbsencesInput, 10) || 0;
+      const newLate = parseInt(adjustLateInput, 10) || 0;
+
+      const deltaAbsences = newAbsences - adjustModalEmp.systemAbsences;
+      const deltaLate = newLate - adjustModalEmp.systemTotalLate;
+
+      const [sYearStr, sMonthStr] = selectedMonth.split('-');
+      const adjKey = `${sMonthStr}-${sYearStr}`;
+
+      try {
+          const existingAdjustments = adjustModalEmp.manualAdjustments || {};
+          
+          await updateDoc(doc(db, 'artifacts', appId, 'users', "shared_company", 'employees', adjustModalEmp.id), {
+              manualAdjustments: {
+                  ...existingAdjustments,
+                  [adjKey]: {
+                      absencesDelta: deltaAbsences,
+                      lateDelta: deltaLate
+                  }
+              }
+          });
+          setAdjustModalEmp(null);
+          showNotification(`${adjustModalEmp.name} ၏ စုစုပေါင်း မှတ်တမ်းကို အောင်မြင်စွာ ပြင်ဆင်ပြီးပါပြီရှင့်။`);
+      } catch (err) {
+          showNotification('ပြင်ဆင်ခြင်း မအောင်မြင်ပါရှင့်။', 'error');
+      }
+  };
+
   // --- Helpers & Stats Calculation ---
   const showNotification = (msg, type = 'success') => {
     setNotification({ msg, type });
@@ -411,7 +460,20 @@ export default function App() {
          }
       }
 
-      return { ...emp, totalLate, absences, isTodayOffDay };
+      let absencesDelta = 0;
+      let lateDelta = 0;
+      if (period === 'month') {
+          const adjKey = `${sMonth}-${sYear}`;
+          if (emp.manualAdjustments && emp.manualAdjustments[adjKey]) {
+              absencesDelta = emp.manualAdjustments[adjKey].absencesDelta || 0;
+              lateDelta = emp.manualAdjustments[adjKey].lateDelta || 0;
+          }
+      }
+
+      const finalAbsences = Math.max(0, absences + absencesDelta);
+      const finalTotalLate = Math.max(0, totalLate + lateDelta);
+
+      return { ...emp, totalLate: finalTotalLate, absences: finalAbsences, systemAbsences: absences, systemTotalLate: totalLate, isTodayOffDay };
     });
   };
 
@@ -690,13 +752,6 @@ Please write a short, encouraging performance review and HR advice in Burmese ba
     }
   };
 
-  const simulateScan = () => {
-    if (employees.length > 0) {
-      setScannedEmployee(employees[1] || employees[0]); 
-      showNotification(`(Testing) ${employees[1]?.name || employees[0].name} ကို တွေ့ရှိပါသည်ရှင့်။`);
-    }
-  };
-
   const openCamera = async (employee) => {
     setSelectedEmployee(employee); setIsCameraOpen(true);
     try {
@@ -843,11 +898,6 @@ Please write a short, encouraging performance review and HR advice in Burmese ba
                   <button onClick={startQrScanner} className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-xl font-semibold flex items-center gap-2 mx-auto transition-transform active:scale-95 shadow-md">
                     <ScanLine className="w-5 h-5" /> QR ဖတ်မည်
                   </button>
-                  {employees.length > 0 && (
-                    <button onClick={simulateScan} className="mt-6 text-xs text-indigo-500 underline font-medium hover:text-indigo-700">
-                      (စမ်းသပ်ရန် - QR မလိုဘဲ ဝန်ထမ်းဒေတာ ခေါ်မည်)
-                    </button>
-                  )}
                 </div>
               )}
 
@@ -1219,6 +1269,7 @@ Please write a short, encouraging performance review and HR advice in Burmese ba
                       <th className="p-3 font-semibold text-sm text-slate-600 text-center">ပျက်ရက်</th>
                       <th className="p-3 font-semibold text-sm text-slate-600 text-center">စုစုပေါင်း နောက်ကျချိန်</th>
                       <th className="p-3 font-semibold text-sm text-slate-600">မှတ်ချက်</th>
+                      <th className="p-3 font-semibold text-sm text-slate-600 text-right no-print">ပြင်ဆင်ရန်</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1231,6 +1282,9 @@ Please write a short, encouraging performance review and HR advice in Burmese ba
                         <td className="p-3 text-sm text-orange-600 font-medium text-center">{emp.totalLate} မိနစ်</td>
                         <td className="p-3 text-sm text-slate-500">
                           {emp.absences > 0 ? 'ပျက်ရက်ရှိသည်' : emp.totalLate > 60 ? 'သတိပေးရန်' : 'ပုံမှန်'}
+                        </td>
+                        <td className="p-3 text-right no-print">
+                           <button onClick={() => openAdjustModal(emp)} className="text-indigo-600 hover:text-indigo-800 p-2 rounded-lg hover:bg-indigo-50 transition-colors border border-transparent hover:border-indigo-100" title="စုစုပေါင်း ပြင်ဆင်မည်"><Edit2 className="w-4 h-4" /></button>
                         </td>
                       </tr>
                     ))}
@@ -1374,7 +1428,7 @@ Please write a short, encouraging performance review and HR advice in Burmese ba
       {/* Delete Old Records Confirm Modal */}
       {showDeleteConfirmModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 no-print">
-          <div className="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl animate-in zoom-in duration-200 text-center">
+           <div className="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl animate-in zoom-in duration-200 text-center">
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4 text-red-600">
               <AlertTriangle className="w-8 h-8" />
             </div>
@@ -1398,6 +1452,38 @@ Please write a short, encouraging performance review and HR advice in Burmese ba
                 {isDeleting ? 'ဖျက်နေပါသည်...' : 'ဖျက်မည်'}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Adjust Totals Modal */}
+      {adjustModalEmp && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl w-full max-w-sm p-6 shadow-2xl animate-in zoom-in duration-200">
+             <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-bold text-slate-800 flex items-center gap-2"><Edit2 className="w-5 h-5 text-indigo-500" /> အချက်အလက် ပြင်မည်</h3>
+                <button onClick={() => setAdjustModalEmp(null)} className="text-slate-400 hover:text-slate-600"><XCircle className="w-6 h-6" /></button>
+             </div>
+             <p className="text-sm text-slate-500 mb-6 font-medium"><strong>{adjustModalEmp.name}</strong> ၏ ယခုလ ({formattedSelectedMonth}) စုစုပေါင်းမှတ်တမ်းကို လိုအပ်သလို ပြင်ဆင်နိုင်ပါသည်။</p>
+             
+             <div className="space-y-4">
+                <div>
+                   <label className="block text-sm font-semibold text-slate-700 mb-1">ပျက်ရက် စုစုပေါင်း (ရက်)</label>
+                   <input type="number" min="0" value={adjustAbsencesInput} onChange={e => setAdjustAbsencesInput(e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 font-bold" />
+                </div>
+                <div>
+                   <label className="block text-sm font-semibold text-slate-700 mb-1">နောက်ကျချိန် စုစုပေါင်း (မိနစ်)</label>
+                   <input type="number" min="0" value={adjustLateInput} onChange={e => setAdjustLateInput(e.target.value)} className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 font-bold" />
+                </div>
+                <div className="border-t border-slate-200 my-2 pt-2">
+                   <label className="block text-sm font-semibold text-slate-700 mb-1 text-red-600 flex items-center gap-1"><Lock className="w-3 h-3" /> Admin Password</label>
+                   <input type="password" value={adjustPasswordInput} onChange={e => setAdjustPasswordInput(e.target.value)} placeholder="Enter Password" className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500" />
+                </div>
+                
+                <button onClick={saveAdjustment} className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition-colors mt-2">
+                  စစ်ဆေးပြီး သိမ်းမည်
+                </button>
+             </div>
           </div>
         </div>
       )}
