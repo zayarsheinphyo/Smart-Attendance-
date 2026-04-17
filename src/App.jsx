@@ -487,6 +487,12 @@ export default function App() {
 
   const chartData = getChartData();
 
+  const presentCount = employees.reduce((count, emp) => {
+     const todayStr = new Date().toLocaleDateString('en-GB');
+     const hasCheckedIn = records.some(r => r.employeeId === emp.id && r.date === todayStr && !r.isAbsent);
+     return count + (hasCheckedIn ? 1 : 0);
+  }, 0);
+
   // Get Formatted selected month (e.g. 05/2026)
   const [sYear, sMonth] = selectedMonth.split('-');
   const formattedSelectedMonth = `${sMonth}/${sYear}`;
@@ -840,23 +846,24 @@ Please write a short, encouraging performance review and HR advice in Burmese ba
       <style>{printStyles}</style>
 
       {/* App Header */}
-      <header className="bg-white shadow-sm px-6 py-4 sticky top-0 z-10 no-print">
-        <div className="max-w-5xl mx-auto flex justify-between items-center">
-          <div>
-            <h1 className="text-xl font-bold text-indigo-600 flex items-center gap-2">
-              <Camera className="w-6 h-6" />
-              Smart Attendance
-            </h1>
-            <p className="text-xs text-slate-500 mt-1">မျက်နှာဖတ် ရုံးတက်/ဆင်း မှတ်တမ်း</p>
+      <header className="bg-[#5B3EB5] shadow-md px-6 py-4 sticky top-0 z-10 no-print text-white">
+        <div className="max-w-6xl mx-auto flex justify-between items-center">
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-3">
+              <div className="bg-white/20 p-2 rounded-full backdrop-blur-sm shadow-inner"><Camera className="w-6 h-6 text-white" /></div>
+              <div>
+                <h1 className="text-xl font-bold text-white uppercase tracking-widest flex items-center gap-2">Smart Attendance</h1>
+                <p className="text-[10px] text-white/70 tracking-wider">စမတ် ရုံးတက်စနစ်</p>
+              </div>
+            </div>
+            <div className="hidden sm:flex border-l border-white/20 pl-6 text-white/90 text-sm font-medium items-center gap-2">
+              {new Date().toLocaleDateString('en-GB')} | {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+            </div>
           </div>
           <div className="flex items-center gap-4">
-            <div className="text-right text-sm font-medium text-slate-600 hidden sm:block">
-              {new Date().toLocaleDateString('en-GB')} <br/>
-              {new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
-            </div>
             {isAdminAuthenticated && (
-              <button onClick={handleAdminLogout} className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-lg text-xs font-bold flex items-center gap-1 transition-colors">
-                <Unlock className="w-4 h-4 text-green-600" /> Lock ပြန်ချမည်
+              <button onClick={handleAdminLogout} className="bg-white text-slate-800 px-4 py-2 rounded-xl text-sm font-bold flex items-center gap-2 shadow-sm hover:bg-slate-100 transition-all">
+                <Lock className="w-4 h-4 text-slate-600" /> Lock ပြန်ချမည်
               </button>
             )}
           </div>
@@ -1005,87 +1012,91 @@ Please write a short, encouraging performance review and HR advice in Burmese ba
         {activeTab === 'dashboard' && (
           <div className="space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-              <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
-                <LayoutDashboard className="w-6 h-6 text-indigo-600" /> Admin Dashboard
+              <h2 className="text-3xl font-extrabold text-slate-800 tracking-tight flex items-center gap-2">
+                စီမံခန့်ခွဲသူ ဒက်ရှ်ဘုတ်
               </h2>
               
               {/* Filter Toggle with Month Picker */}
-              <div className="flex items-center gap-2 w-full sm:w-auto">
+              <div className="flex items-center gap-3 w-full sm:w-auto">
                 {dashboardFilter === 'month' && (
-                  <input 
-                    type="month" 
-                    value={selectedMonth}
-                    onChange={(e) => setSelectedMonth(e.target.value)}
-                    className="px-3 py-2 border border-slate-300 rounded-lg text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-500 shadow-sm"
-                  />
+                  <div className="bg-white px-3 py-1.5 border border-slate-200 rounded-xl shadow-sm text-sm font-bold text-slate-700">
+                    <input 
+                      type="month" 
+                      value={selectedMonth}
+                      onChange={(e) => setSelectedMonth(e.target.value)}
+                      className="bg-transparent focus:outline-none focus:ring-0 cursor-pointer"
+                    />
+                  </div>
                 )}
-                <div className="flex bg-slate-200 p-1 rounded-xl flex-1 sm:flex-none">
-                  <button 
-                    onClick={() => setDashboardFilter('today')}
-                    className={`flex-1 sm:px-6 py-2 rounded-lg text-sm font-semibold transition-all ${dashboardFilter === 'today' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
-                  >
-                    ယနေ့
-                  </button>
+                <div className="flex bg-white shadow-sm border border-slate-200 p-1 rounded-xl flex-1 sm:flex-none">
                   <button 
                     onClick={() => setDashboardFilter('month')}
-                    className={`flex-1 sm:px-6 py-2 rounded-lg text-sm font-semibold transition-all ${dashboardFilter === 'month' ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                    className={`flex-1 sm:px-6 py-2 rounded-lg text-sm font-bold transition-all ${dashboardFilter === 'month' ? 'bg-[#5B3EB5] text-white shadow-md' : 'text-slate-600 hover:text-slate-900'}`}
                   >
                     လအလိုက်
+                  </button>
+                  <button 
+                    onClick={() => setDashboardFilter('today')}
+                    className={`flex-1 sm:px-6 py-2 rounded-lg text-sm font-bold transition-all ${dashboardFilter === 'today' ? 'bg-[#5B3EB5] text-white shadow-md' : 'text-slate-600 hover:text-slate-900'}`}
+                  >
+                    ယနေ့
                   </button>
                 </div>
               </div>
             </div>
             
             {/* Stat Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 border-l-4 border-l-blue-500">
-                <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-blue-600"><Users className="w-6 h-6" /></div>
-                <div>
-                  <p className="text-sm text-slate-500 font-medium">စုစုပေါင်း ဝန်ထမ်း</p>
-                  <h3 className="text-2xl font-bold text-slate-800">{totalEmployees} <span className="text-sm font-normal text-slate-500">ဦး</span></h3>
-                </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center gap-2">
+                <p className="text-sm text-slate-600 font-bold">စုစုပေါင်း ဝန်ထမ်း</p>
+                <h3 className="text-3xl font-extrabold text-slate-800">{totalEmployees} <span className="text-lg font-bold text-slate-500">ဦး</span></h3>
               </div>
-              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 border-l-4 border-l-orange-500">
-                <div className="w-12 h-12 bg-orange-50 rounded-full flex items-center justify-center text-orange-600"><Clock className="w-6 h-6" /></div>
-                <div>
-                  <p className="text-sm text-slate-500 font-medium">{dashboardFilter === 'today' ? 'ယနေ့ နောက်ကျချိန်' : `ရွေးချယ်ထားသောလ (${formattedSelectedMonth}) တွင်`}</p>
-                  <h3 className="text-2xl font-bold text-slate-800">{totalLateMinutes} <span className="text-sm font-normal text-slate-500">မိနစ်</span></h3>
-                </div>
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center gap-2">
+                <p className="text-sm text-slate-600 font-bold">{dashboardFilter === 'today' ? 'ယနေ့ နောက်ကျချိန်' : 'နောက်ကျချိန် (မိနစ်)'}</p>
+                <h3 className="text-3xl font-extrabold text-slate-800">{totalLateMinutes} <span className="text-lg font-bold text-slate-500">မိနစ်</span></h3>
               </div>
-              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-4 border-l-4 border-l-red-500">
-                <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center text-red-600"><CalendarOff className="w-6 h-6" /></div>
-                <div>
-                  <p className="text-sm text-slate-500 font-medium">{dashboardFilter === 'today' ? 'ယနေ့ ပျက်ရက်' : 'လအလိုက် ပျက်ရက်စုစုပေါင်း'}</p>
-                  <h3 className="text-2xl font-bold text-slate-800">{totalAbsences} <span className="text-sm font-normal text-slate-500">ရက်</span></h3>
-                </div>
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center gap-2">
+                <p className="text-sm text-slate-600 font-bold">{dashboardFilter === 'today' ? 'ယနေ့ ပျက်ကွက်' : 'ပျက်ကွက် (ရက်)'}</p>
+                <h3 className="text-3xl font-extrabold text-slate-800">{totalAbsences} <span className="text-lg font-bold text-slate-500">ရက်</span></h3>
+              </div>
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center gap-2">
+                <p className="text-sm text-slate-600 font-bold">လက်ရှိ ရုံးရောက်</p>
+                <h3 className="text-3xl font-extrabold text-slate-800">{presentCount} <span className="text-lg font-bold text-slate-500">/ {totalEmployees} ဦး</span></h3>
               </div>
             </div>
 
             {/* Graph */}
             {dashboardFilter === 'month' && (
               <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
-                <h2 className="text-lg font-bold mb-6 flex items-center gap-2 text-slate-700">
-                  <BarChart3 className="w-5 h-5 text-indigo-500" /> 
-                  ရွေးချယ်ထားသောလ ဝန်ထမ်းအလိုက် နောက်ကျချိန် (မိနစ်)
+                <h2 className="text-lg font-bold mb-6 flex items-center gap-2 text-slate-800">
+                  ဝန်ထမ်းအလိုက် နောက်ကျမှု (မိနစ်)
                 </h2>
                 
                 {chartData.names.length === 0 ? (
                   <div className="h-40 flex items-center justify-center text-slate-400 text-sm">ဝန်ထမ်းစာရင်း မရှိသေးပါရှင့်။</div>
                 ) : (
                   <div className="overflow-x-auto pb-4">
-                    <div className="h-64 flex items-end justify-start gap-4 mt-4 pt-4 border-b border-slate-200 relative min-w-max px-2">
+                    <div className="h-56 flex items-end justify-start gap-8 mt-4 border-b border-slate-200 relative min-w-max px-4">
+                      {/* Grid Lines */}
+                      <div className="absolute inset-0 flex flex-col justify-between pointer-events-none mb-0.5 z-0">
+                         <div className="border-b border-slate-100 w-full flex-1"></div>
+                         <div className="border-b border-slate-100 w-full flex-1"></div>
+                         <div className="border-b border-slate-100 w-full flex-1"></div>
+                         <div className="border-b border-slate-100 w-full flex-1"></div>
+                      </div>
+
                       {chartData.totals.map((val, idx) => {
                         const heightPercent = Math.max((val / chartData.maxVal) * 100, 2); 
                         return (
-                          <div key={idx} className="w-16 flex flex-col items-center group relative">
-                            <div className="absolute -top-10 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-800 text-white text-xs py-1 px-2 rounded font-bold pointer-events-none whitespace-nowrap z-10">
+                          <div key={idx} className="w-16 flex flex-col items-center group relative z-10">
+                            <div className="absolute -top-8 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-800 text-white text-xs py-1 px-2 rounded font-bold pointer-events-none whitespace-nowrap">
                               {val} မိနစ်
                             </div>
                             <div 
-                              className={`w-full max-w-[40px] rounded-t-sm transition-all ${val > 0 ? 'bg-indigo-500 group-hover:bg-indigo-400' : 'bg-slate-200'}`}
+                              className={`w-12 rounded-sm transition-all ${val > 0 ? 'bg-[#5B3EB5] group-hover:bg-[#4E35A0]' : 'bg-slate-200'}`}
                               style={{ height: `${heightPercent}%` }}
                             ></div>
-                            <div className="absolute -bottom-8 text-[10px] sm:text-xs text-slate-600 font-medium text-center truncate w-full" title={chartData.names[idx]}>
+                            <div className="absolute -bottom-8 text-xs text-slate-700 font-bold text-center truncate w-full" title={chartData.names[idx]}>
                               {String(chartData.names[idx] || '').substring(0, 6)}
                             </div>
                           </div>
@@ -1097,93 +1108,56 @@ Please write a short, encouraging performance review and HR advice in Burmese ba
               </div>
             )}
 
-            {/* Problematic Employees List */}
-            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-              <div className="bg-slate-50 px-6 py-4 border-b border-slate-200 flex justify-between items-center">
-                <h2 className="text-lg font-bold flex items-center gap-2 text-slate-700">
-                  <AlertCircle className="w-5 h-5 text-indigo-500" /> 
-                  {dashboardFilter === 'today' ? 'ယနေ့ နောက်ကျ / ပျက်ကွက်သူများ' : 'လအလိုက် နောက်ကျ / ပျက်ကွက်သူများ'}
+            {/* Detailed Employee State Table */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden mt-8">
+              <div className="px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-slate-100 gap-4">
+                <h2 className="text-lg font-bold text-slate-800">
+                  ဝန်ထမ်းအသေးစိတ် အခြေအနေ
                 </h2>
-                <span className="bg-indigo-100 text-indigo-700 text-xs font-bold px-3 py-1 rounded-full">
-                  {problematicEmployees.length} ဦး
-                </span>
+                <button onClick={exportToExcel} className="border border-[#5B3EB5] text-[#5B3EB5] hover:bg-[#5B3EB5] hover:text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all">
+                  Excel သို့ ထုတ်ယူရန် <Download className="w-4 h-4 inline" />
+                </button>
               </div>
               
-              <div className="p-4 sm:p-6">
-                {problematicEmployees.length === 0 ? (
-                  <div className="text-center py-12 flex flex-col items-center">
-                    <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mb-3">
-                      <CheckCircle className="w-8 h-8 text-green-500" />
-                    </div>
-                    <p className="text-slate-500 font-medium">
-                      {dashboardFilter === 'today' ? 'ဒီနေ့ နောက်ကျသူ သို့မဟုတ် ပျက်သူ မရှိပါဘူးရှင့်။' : 'ရွေးချယ်ထားသောလအတွင်း နောက်ကျသူ သို့မဟုတ် ပျက်သူ မရှိပါဘူးရှင့်။'}
-                    </p>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {problematicEmployees.map(emp => {
-                      const isExpanded = selectedDashboardEmpId === emp.id;
-                      const tStats = todayStats.find(e => e.id === emp.id);
-                      const mStats = monthlyStats.find(e => e.id === emp.id);
-                      
-                      return (
-                        <div 
-                          key={emp.id} 
-                          onClick={() => setSelectedDashboardEmpId(isExpanded ? null : emp.id)}
-                          className={`cursor-pointer rounded-xl border transition-all duration-300 ${isExpanded ? 'border-indigo-300 shadow-md bg-white' : 'border-slate-200 bg-slate-50 hover:border-indigo-200 hover:bg-white'}`}
-                        >
-                          <div className="p-4 flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 font-bold flex items-center justify-center">
-                                {emp.name.charAt(0)}
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-200">
+                      <th className="p-4 font-bold text-sm text-slate-700">အမည်</th>
+                      <th className="p-4 font-bold text-sm text-slate-700">ဌာန</th>
+                      <th className="p-4 font-bold text-sm text-slate-700">အခြေအနေ</th>
+                      <th className="p-4 font-bold text-sm text-slate-700 text-right">အသေးစိတ်</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {dashboardStats.length === 0 ? (
+                      <tr><td colSpan="4" className="text-center p-8 text-slate-400 font-medium">မှတ်တမ်းမရှိပါ</td></tr>
+                    ) : (
+                      dashboardStats.map(emp => (
+                        <tr key={emp.id} className="border-b border-slate-50 hover:bg-slate-50 transition-colors">
+                          <td className="p-4 text-sm font-bold text-slate-800">{emp.name}</td>
+                          <td className="p-4 text-sm text-slate-500 font-medium">{emp.position}</td>
+                          <td className="p-4 text-sm">
+                            {emp.absences === 0 && emp.totalLate === 0 ? (
+                              <span className="text-green-600 font-bold">ပုံမှန်</span>
+                            ) : (
+                              <div className="flex gap-2 items-center text-slate-600 font-medium whitespace-nowrap">
+                                {emp.absences > 0 && <span className="text-red-500">ပျက်ကွက် {emp.absences} ရက်</span>}
+                                {emp.absences > 0 && emp.totalLate > 0 && <span>/</span>}
+                                {emp.totalLate > 0 && <span className="text-orange-500">နောက်ကျ {emp.totalLate} မိနစ်</span>}
                               </div>
-                              <div>
-                                <h3 className="font-bold text-slate-800">{emp.name}</h3>
-                                <p className="text-xs text-slate-500">{emp.position}</p>
-                              </div>
-                            </div>
-                            <div className="flex flex-col gap-1 items-end">
-                              {emp.absences > 0 && <span className="text-[10px] bg-red-100 text-red-700 px-2 py-0.5 rounded-md font-bold">ပျက်ရက် {emp.absences} ရက်</span>}
-                              {emp.totalLate > 0 && <span className="text-[10px] bg-orange-100 text-orange-700 px-2 py-0.5 rounded-md font-bold">နောက်ကျ {emp.totalLate} မိနစ်</span>}
-                            </div>
-                          </div>
-                          
-                          {isExpanded && (
-                            <div className="px-4 pb-4 animate-in slide-in-from-top-2">
-                              <div className="bg-slate-50 rounded-lg p-3 border border-slate-100 space-y-3">
-                                <div className="flex justify-between items-center text-sm">
-                                  <span className="font-semibold text-slate-600 flex items-center gap-2">
-                                    <Clock className="w-4 h-4 text-indigo-400" /> ယနေ့ အခြေအနေ:
-                                  </span>
-                                  <div className="text-right">
-                                    {tStats?.absences > 0 ? (
-                                      <span className="text-red-600 font-medium">ပျက်ရက်</span>
-                                    ) : tStats?.totalLate > 0 ? (
-                                      <span className="text-orange-600 font-medium">နောက်ကျ ({tStats.totalLate} မိနစ်)</span>
-                                    ) : (
-                                      <span className="text-green-600 font-medium">အချိန်မှန် / မရှိ</span>
-                                    )}
-                                  </div>
-                                </div>
-                                <div className="h-px bg-slate-200 w-full"></div>
-                                <div className="flex justify-between items-center text-sm">
-                                  <span className="font-semibold text-slate-600 flex items-center gap-2">
-                                    <Calendar className="w-4 h-4 text-indigo-400" /> စုစုပေါင်း ({formattedSelectedMonth}):
-                                  </span>
-                                  <div className="text-right flex gap-2">
-                                    <span className="text-red-600 font-medium">ပျက်: {mStats?.absences || 0}</span>
-                                    <span className="text-slate-300">|</span>
-                                    <span className="text-orange-600 font-medium">နောက်ကျ: {mStats?.totalLate || 0}</span>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
+                            )}
+                          </td>
+                          <td className="p-4 text-right">
+                             <button onClick={() => { setActiveTab('employees'); setEditingEmpId(emp.id); }} className="border border-slate-300 text-slate-600 hover:bg-slate-100 px-4 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap">
+                               ပရိုဖိုင်ကြည့်ရန်
+                             </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
               </div>
             </div>
 
@@ -1507,16 +1481,21 @@ Please write a short, encouraging performance review and HR advice in Burmese ba
       )}
 
       {/* Navigation */}
-      <nav className="fixed bottom-0 w-full bg-white border-t border-slate-200 flex justify-around px-1 py-2 pb-safe z-10 shadow-[0_-4px_6px_-1px_rgb(0,0,0,0.05)] no-print">
+      <nav className="fixed bottom-0 w-full bg-white border-t border-slate-200 flex justify-around pb-safe z-10 shadow-[0_-4px_10px_-1px_rgb(0,0,0,0.1)] no-print">
         {[
-          { id: 'attendance', icon: Camera, label: 'စာရင်းသွင်း' },
-          { id: 'dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+          { id: 'attendance', icon: ScanLine, label: 'စာရင်းသွင်း' },
+          { id: 'dashboard', icon: LayoutDashboard, label: 'ဒက်ရှ်ဘုတ်' },
           { id: 'employees', icon: Users, label: 'ဝန်ထမ်းများ' },
           { id: 'reports', icon: ClipboardList, label: 'အစီရင်ခံစာ' },
           { id: 'settings', icon: Settings, label: 'ဆက်တင်' }
         ].map(tab => (
-          <button key={tab.id} onClick={() => handleTabChange(tab.id)} className={`flex flex-col items-center p-2 rounded-xl flex-1 transition-colors ${activeTab === tab.id ? 'text-indigo-600 font-bold' : 'text-slate-400 hover:text-slate-600'}`}>
-            <tab.icon className="w-5 h-5 mb-1" />
+          <button 
+            key={tab.id} 
+            onClick={() => handleTabChange(tab.id)} 
+            className={`flex flex-col items-center pt-3 pb-2 flex-1 transition-colors relative ${activeTab === tab.id ? 'text-[#5B3EB5] bg-[#5B3EB5]/5 font-extrabold' : 'text-slate-400 hover:text-slate-600 font-semibold'}`}
+          >
+            {activeTab === tab.id && <div className="absolute top-0 left-0 w-full h-1 bg-[#5B3EB5]"></div>}
+            <tab.icon className="w-6 h-6 mb-1" />
             <span className="text-[10px] sm:text-xs whitespace-nowrap">{tab.label}</span>
           </button>
         ))}
