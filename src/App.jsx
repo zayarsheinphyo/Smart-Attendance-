@@ -1088,14 +1088,15 @@ Please write a short, encouraging performance review and HR advice in Burmese ba
                       {chartData.totals.map((val, idx) => {
                         const heightPercent = Math.max((val / chartData.maxVal) * 100, 2); 
                         return (
-                          <div key={idx} className="w-16 flex flex-col items-center group relative z-10">
-                            <div className="absolute -top-8 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-800 text-white text-xs py-1 px-2 rounded font-bold pointer-events-none whitespace-nowrap">
-                              {val} မိနစ်
+                          <div key={idx} className="w-16 h-full flex flex-col items-center justify-end group relative z-10">
+                            <div className="w-full flex flex-col items-center relative" style={{ height: `${heightPercent}%` }}>
+                              <div className="absolute -top-8 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-800 text-white text-xs py-1 px-2 rounded font-bold pointer-events-none whitespace-nowrap z-20">
+                                {val} မိနစ်
+                              </div>
+                              <div 
+                                className={`w-12 h-full rounded-t-sm transition-all ${val > 0 ? 'bg-[#5B3EB5] group-hover:bg-[#4E35A0]' : 'bg-slate-200'}`}
+                              ></div>
                             </div>
-                            <div 
-                              className={`w-12 rounded-sm transition-all ${val > 0 ? 'bg-[#5B3EB5] group-hover:bg-[#4E35A0]' : 'bg-slate-200'}`}
-                              style={{ height: `${heightPercent}%` }}
-                            ></div>
                             <div className="absolute -bottom-8 text-xs text-slate-700 font-bold text-center truncate w-full" title={chartData.names[idx]}>
                               {String(chartData.names[idx] || '').substring(0, 6)}
                             </div>
