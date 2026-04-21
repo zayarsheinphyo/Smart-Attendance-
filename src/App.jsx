@@ -522,7 +522,7 @@ export default function App() {
       `"${emp.position}"`, 
       emp.absences, 
       emp.totalLate, 
-      `"${emp.absences > 0 ? 'ပျက်ရက်ရှိသည်' : emp.totalLate > 60 ? 'သတိပေးရန်' : 'ပုံမှန်'}"`
+      `"${emp.absences > 0 ? 'ပျက်ရက်ရှိသည်' : emp.totalLate > 60 ? 'သတိပေးရန်' : emp.totalLate > 0 ? 'နောက်ကျရှိသည်' : 'ပုံမှန်'}"`
     ]);
     
     const csvContent = "\uFEFF" + [headers.join(","), ...rows.map(r => r.join(","))].join("\n");
@@ -1291,7 +1291,7 @@ Please write a short, encouraging performance review and HR advice in Burmese ba
                         <td className="p-3 text-sm text-red-600 font-bold text-center">{emp.absences} ရက်</td>
                         <td className="p-3 text-sm text-orange-600 font-medium text-center">{emp.totalLate} မိနစ်</td>
                         <td className="p-3 text-sm text-slate-500">
-                          {emp.absences > 0 ? 'ပျက်ရက်ရှိသည်' : emp.totalLate > 60 ? 'သတိပေးရန်' : 'ပုံမှန်'}
+                          {emp.absences > 0 ? 'ပျက်ရက်ရှိသည်' : emp.totalLate > 60 ? 'သတိပေးရန်' : emp.totalLate > 0 ? 'နောက်ကျရှိသည်' : 'ပုံမှန်'}
                         </td>
                         <td className="p-3 text-right no-print">
                            <button onClick={() => openAdjustModal(emp)} className="text-indigo-600 hover:text-indigo-800 p-2 rounded-lg hover:bg-indigo-50 transition-colors border border-transparent hover:border-indigo-100" title="စုစုပေါင်း ပြင်ဆင်မည်"><Edit2 className="w-4 h-4" /></button>
