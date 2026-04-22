@@ -426,13 +426,6 @@ export default function App() {
              if (emp.offDays?.includes(d)) continue;
 
              const officeActive = isOfficeActiveDay(d, sMonth, sYear);
-             
-             // If office was closed this day, we ignore it completely to avoid counting auto-generated phantom records
-             const isPastDayInMonth = (parseInt(sYear) < now.getFullYear()) || 
-                                      (parseInt(sYear) === now.getFullYear() && parseInt(sMonth) < (now.getMonth() + 1)) || 
-                                      (isCurrentMonthView && d < todayDateNum);
-             if (isPastDayInMonth && !officeActive) continue;
-             if (isCurrentMonthView && d === todayDateNum && !officeActive) continue;
 
              const dayRecords = empRecords.filter(r => isSameDate(r.date, d, sMonth, sYear));
              
