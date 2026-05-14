@@ -1259,8 +1259,8 @@ Please write a short, encouraging performance review and HR advice in Burmese ba
                             )}
                           </td>
                           <td className="p-4 text-right">
-                             <button onClick={() => { setActiveTab('employees'); setEditingEmpId(emp.id); }} className="border border-slate-300 text-slate-600 hover:bg-slate-100 px-4 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap">
-                               ပရိုဖိုင်ကြည့်ရန်
+                             <button onClick={() => openDetailModal(emp)} className="border border-[#5B3EB5] text-[#5B3EB5] hover:bg-[#5B3EB5] hover:text-white px-4 py-1.5 rounded-lg text-xs font-bold transition-all whitespace-nowrap">
+                               Detail
                              </button>
                           </td>
                         </tr>
